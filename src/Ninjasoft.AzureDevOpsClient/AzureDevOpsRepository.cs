@@ -1,12 +1,7 @@
 ﻿using MoreLinq;
 using Newtonsoft.Json;
 using Ninjasoft.AzureDevOpsClient.Models;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ninjasoft.AzureDevOpsClient
 {
@@ -22,7 +17,7 @@ namespace Ninjasoft.AzureDevOpsClient
         public async Task<IEnumerable<GitPullRequest>> GetActivePullRequestsForRepositoryAsync(string repositoryId)
         {
             var response = await _factory.Create()
-                                         .WithPath($"_apis/git/repositories/{repositoryId}/pullrequests")
+                                         .WithPath($"_apis/git/repositories/{Uri.EscapeDataString(repositoryId)}/pullrequests")
                                          .WithQueryString("searchCriteria.status=active")
                                          .UsingApiVersion(DefaultApiVersion)
                                          .Get()
@@ -52,20 +47,20 @@ namespace Ninjasoft.AzureDevOpsClient
             return response.Value;
         }
 
-        public async Task<List<TeamSettingsIteration>> GetIterationsAsync()
+        public async Task<List<TeamSettingsIteration>> GetIterationsAsync(string backlog)
         {
             var response = await _factory.Create()
-                                         .WithPath("active/_apis/work/teamsettings/iterations")
+                                         .WithPath($"{Uri.EscapeDataString(backlog)}/_apis/work/teamsettings/iterations")
                                          .UsingApiVersion(DefaultApiVersion)
                                          .Get()
                                          .DeserializeResponseAsync<ResponseList<TeamSettingsIteration>>();
             return response.Value;
         }
 
-        public async Task<IterationWorkItems> GetIterationWorkItemsAsync(string iterationId)
+        public async Task<IterationWorkItems> GetIterationWorkItemsAsync(string backlog, string iterationId)
         {
             var response = await _factory.Create()
-                                         .WithPath($"active/_apis/work/teamsettings/iterations/{iterationId}/workitems")
+                                         .WithPath($"{Uri.EscapeDataString(backlog)}/_apis/work/teamsettings/iterations/{iterationId}/workitems")
                                          .UsingApiVersion($"{DefaultApiVersion}-preview.1")
                                          .Get()
                                          .DeserializeResponseAsync<IterationWorkItems>();
