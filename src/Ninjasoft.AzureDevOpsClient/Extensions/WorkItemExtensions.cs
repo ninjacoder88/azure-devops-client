@@ -7,7 +7,7 @@ namespace Ninjasoft.AzureDevOpsClient.Extensions
     {
         public static T GetFieldValue<T>(this WorkItem workItem, string fieldName) where T : class
         {
-            if (!workItem.fields.TryGetValue(fieldName, out object fieldObject))
+            if (!workItem.Fields.TryGetValue(fieldName, out object fieldObject))
                 return default;
 
             var fieldObjectType = fieldObject.GetType();
@@ -24,7 +24,7 @@ namespace Ninjasoft.AzureDevOpsClient.Extensions
 
         public static T GetFieldValueAsStruct<T>(this WorkItem workItem, string fieldName) where T : struct
         {
-            if (!workItem.fields.TryGetValue(fieldName, out object fieldObject))
+            if (!workItem.Fields.TryGetValue(fieldName, out object fieldObject))
                 return default;
 
             var fieldObjectType = fieldObject.GetType();
@@ -41,7 +41,7 @@ namespace Ninjasoft.AzureDevOpsClient.Extensions
 
         public static string GetFieldValueAsString(this WorkItem workItem, string fieldName)
         {
-            if (!workItem.fields.TryGetValue(fieldName, out object fieldObject))
+            if (!workItem.Fields.TryGetValue(fieldName, out object fieldObject))
                 return default;
 
             return fieldObject.ToString();

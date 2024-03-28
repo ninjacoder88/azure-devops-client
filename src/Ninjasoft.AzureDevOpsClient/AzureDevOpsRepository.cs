@@ -7,173 +7,143 @@ namespace Ninjasoft.AzureDevOpsClient
 {
     public class AzureDevOpsRepository
     {
-        private const string DefaultApiVersion = "6.0";
-
         public AzureDevOpsRepository(IAzureDevOpsUrlBuilderFactory factory)
         {
             _factory = factory;
         }
 
-        public async Task<IEnumerable<GitPullRequest>> GetActivePullRequestsForRepositoryAsync(string repositoryId)
-        {
-            var response = await _factory.Create()
-                                         .WithPath($"_apis/git/repositories/{Uri.EscapeDataString(repositoryId)}/pullrequests")
-                                         .WithQueryString("searchCriteria.status=active")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<ResponseList<GitPullRequest>>();
+        public async Task<List<GitPullRequest>> GetActivePullRequestsForRepositoryAsync(string repositoryId) => 
+            await _factory.Create()
+                            .WithPath($"_apis/git/repositories/{Uri.EscapeDataString(repositoryId)}/pullrequests")
+                            .WithQueryString("searchCriteria.status=active")
+                            .Get()
+                            .DeserializeResponseListAsync<GitPullRequest>();
+        
+        public async Task<Build> GetBuildAsync(int buildId) =>
+            await _factory.Create()
+                            .WithPath($"_apis/build/builds/{buildId}")
+                            .Get()
+                            .DeserializeResponseAsync<Build>();
+        
+        public async Task<List<Change>> GetBuildChangesAsync(int buildId) =>
+            await _factory.Create()
+                            .WithPath($"_apis/build/builds/{buildId}/changes")
+                            .Get()
+                            .DeserializeResponseListAsync<Change>();
 
-            return response.Value;
-        }
+        public async Task<List<ResourceRef>> GetBuildWorkItemResourcesAsync(int buildId) =>
+            await _factory.Create()
+                            .WithPath($"_apis/build/builds/{buildId}/workItems")
+                            .Get()
+                            .DeserializeResponseListAsync<ResourceRef>();
 
-        public async Task<Build> GetBuildAsync(int buildId)
-        {
-            return await _factory.Create()
-                                 .WithPath($"_apis/build/builds/{buildId}")
-                                 .UsingApiVersion(DefaultApiVersion)
-                                 .Get()
-                                 .DeserializeResponseAsync<Build>();
-        }
+        public async Task<List<TestRunCoverage>> GetBuildCodeCoverageAsync(int buildId) =>
+            await _factory.Create()
+                            .WithPath("/_apis/test/codecoverage")
+                            .WithQueryString($"buildId={buildId}&flags=1")
+                            .Get()
+                            .DeserializeResponseListAsync<TestRunCoverage>();
 
-        public async Task<List<TestRunCoverage>> GetBuildCodeCoverageAsync(int buildId)
-        {
-            var response = await _factory.Create()
-                                         .WithPath("/_apis/test/codecoverage")
-                                         .WithQueryString($"buildId={buildId}&flags=1")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<ResponseList<TestRunCoverage>>();
+        public async Task<List<TeamSettingsIteration>> GetIterationsAsync(string backlog) =>
+            await _factory.Create()
+                            .WithPath($"{Uri.EscapeDataString(backlog)}/_apis/work/teamsettings/iterations")
+                            .Get()
+                            .DeserializeResponseListAsync<TeamSettingsIteration>();
+        
+        public async Task<IterationWorkItems> GetIterationWorkItemsAsync(string backlog, string iterationId) =>
+            await _factory.Create()
+                            .WithPath($"{Uri.EscapeDataString(backlog)}/_apis/work/teamsettings/iterations/{iterationId}/workitems")
+                            .UsingApiVersion($"6.0-preview.1")
+                            .Get()
+                            .DeserializeResponseAsync<IterationWorkItems>();
 
-            return response.Value;
-        }
+        public async Task<List<Pipeline>> GetPipelinesAsync() =>
+            await _factory.Create()
+                            .WithPath("_apis/pipelines")
+                            .Get()
+                            .DeserializeResponseListAsync<Pipeline>();
+        
+        public async Task<List<TeamProjectReference>> GetProjectsForOrganizationAsync() =>
+            await _factory.Create()
+                            .WithPath("_apis/projects")
+                            .Get()
+                            .DeserializeResponseListAsync<TeamProjectReference>();
+        
+        public async Task<List<ResourceRef>> GetPullRequestWorkItemsAsync(string repositoryId, int pullRequestId) =>
+            await _factory.Create()
+                            .WithPath($"_apis/git/repositories/{repositoryId}/pullRequests/{pullRequestId}/workitems")
+                            .Get()
+                            .DeserializeResponseListAsync<ResourceRef>();
 
-        public async Task<List<TeamSettingsIteration>> GetIterationsAsync(string backlog)
-        {
-            var response = await _factory.Create()
-                                         .WithPath($"{Uri.EscapeDataString(backlog)}/_apis/work/teamsettings/iterations")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<ResponseList<TeamSettingsIteration>>();
-            return response.Value;
-        }
+        public async Task<Release> GetReleaseAsync(int releaseId) =>
+            await _factory.Create()
+                            .WithSubDomain("vsrm")
+                            .WithPath($"_apis/release/releases/{releaseId}")
+                            .Get()
+                            .DeserializeResponseAsync<Release>();
+        
+        public async Task<List<ReleaseDefinition>> GetReleaseDefinitionsAsync() =>
+            await _factory.Create()
+                            .WithSubDomain("vsrm")
+                            .WithPath("_apis/release/definitions")
+                            //.WithQueryString("$expand=Environments")
+                            .Get()
+                            .DeserializeResponseListAsync<ReleaseDefinition>();
+        
+        public async Task<ReleaseDefinition> GetReleaseDefinitionAsync(int releaseDefinitionId) =>
+            await _factory.Create()
+                            .WithSubDomain("vsrm")
+                            .WithPath($"_apis/release/definitions/{releaseDefinitionId}")
+                            .Get()
+                            .DeserializeResponseAsync<ReleaseDefinition>();
 
-        public async Task<IterationWorkItems> GetIterationWorkItemsAsync(string backlog, string iterationId)
-        {
-            var response = await _factory.Create()
-                                         .WithPath($"{Uri.EscapeDataString(backlog)}/_apis/work/teamsettings/iterations/{iterationId}/workitems")
-                                         .UsingApiVersion($"{DefaultApiVersion}-preview.1")
-                                         .Get()
-                                         .DeserializeResponseAsync<IterationWorkItems>();
-            return response;
-        }
+        public async Task<string> GetReleaseDefinitionStringAsync(int releaseDefinitionId) =>   
+            await _factory.Create()
+                            .WithSubDomain("vsrm")
+                            .WithPath($"_apis/release/definitions/{releaseDefinitionId}")
+                            .GetAsync();
 
-        public async Task<IEnumerable<TeamProjectReference>> GetProjectsForOrganization()
-        {
-            var response = await _factory.Create()
-                                         .WithPath("_apis/projects")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<ResponseList<TeamProjectReference>>();
+        public async Task<List<Release>> GetReleasesBetweenAsync(DateTime start, DateTime end) =>
+            await _factory.Create()
+                            .WithSubDomain("vsrm")
+                            .WithPath($"_apis/release/releases")
+                            .WithQueryString($"minCreatedTime={start.ToString("s", DateTimeFormatInfo.CurrentInfo)}&maxCreatedTime={end.ToString("s", DateTimeFormatInfo.CurrentInfo)}")
+                            .Get()
+                            .DeserializeResponseListAsync<Release>();
 
-            return response.Value;
-        }
+        public async Task<List<Release>> GetReleasesAfterAsync(DateTimeOffset createdAfterDateTime) =>
+            await _factory.Create()
+                            .WithSubDomain("vsrm")
+                            .WithPath("_apis/release/releases")
+                            .WithQueryString($"minCreatedTime={createdAfterDateTime.ToString("yyyy-MM-ddThh:mm:ss.fffZ")}")
+                            .Get()
+                            .DeserializeResponseListAsync<Release>();
 
-        public async Task<Release> GetReleaseAsync(int releaseId)
-        {
-            var response = await _factory.Create()
-                                         .WithSubDomain("vsrm")
-                                         .WithPath($"_apis/release/releases/{releaseId}")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<Release>();
-            return response;
-        }
+        public async Task<List<GitRepository>> GetRepositoriesForProjectAsync() =>
+            await _factory.Create()
+                            .WithPath("/_apis/git/repositories")
+                            .Get()
+                            .DeserializeResponseListAsync<GitRepository>();
+ 
+        public async Task<List<TestCaseResult>> GetTestCaseResultsAsync(int testRunId) =>
+            await _factory.Create()
+                            .WithPath($"_apis/test/runs/{testRunId}/results")
+                            .Get()
+                            .DeserializeResponseListAsync<TestCaseResult>();
 
-        public async Task<List<ReleaseDefinition>> GetReleaseDefinitionsAsync()
-        {
-            var response = await _factory.Create()
-                                         .WithSubDomain("vsrm")
-                                         .WithPath("_apis/release/definitions")
-                                         //.WithQueryString("$expand=Environments")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<ResponseList<ReleaseDefinition>>();
-            return response.Value;
-        }
+        public async Task<List<TestRun>> GetTestRunsAsync(DateTime start, DateTime end, int buildId) =>       
+            await _factory.Create()
+                            .WithPath("_apis/test/runs")
+                            .WithQueryString($"minLastUpdatedDate={start.ToString("s", DateTimeFormatInfo.CurrentInfo)}&maxLastUpdatedDate={end.ToString("s", DateTimeFormatInfo.CurrentInfo)}&buildIds={buildId}&$top=1")
+                            .Get()
+                            .DeserializeResponseListAsync<TestRun>();
 
-        public async Task<ReleaseDefinition> GetReleaseDefinitionAsync(int releaseDefinitionId)
-        {
-            var response = await _factory.Create()
-                                         .WithSubDomain("vsrm")
-                                         .WithPath($"_apis/release/definitions/{releaseDefinitionId}")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<ReleaseDefinition>();
-            return response;
-        }
-
-        public async Task<string> GetReleaseDefinitionStringAsync(int releaseDefinitionId)
-        {
-            var response = await _factory.Create()
-                                         .WithSubDomain("vsrm")
-                                         .WithPath($"_apis/release/definitions/{releaseDefinitionId}")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .GetAsync();
-            return response;
-        }
-
-        public async Task<List<Release>> GetReleasesAfterAsync(DateTimeOffset createdAfterDateTime)
-        {
-            string minCreatedTime = createdAfterDateTime.ToString("yyyy-MM-ddThh:mm:ss.fffZ");
-
-            var response = await _factory.Create()
-                                         .WithSubDomain("vsrm")
-                                         .WithPath("_apis/release/releases")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .WithQueryString($"minCreatedTime={minCreatedTime}")
-                                         .Get()
-                                         .DeserializeResponseAsync<ResponseList<Release>>();
-
-            return response.Value;
-        }
-
-        public async Task<IEnumerable<GitRepository>> GetRepositoriesForProjectAsync()
-        {
-            var response = await _factory.Create()
-                                         .WithPath("/_apis/git/repositories")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<ResponseList<GitRepository>>();
-
-            return response.Value;
-        }
-
-        public async Task<TestRun> GetTestRunAsync(DateTime start, DateTime end, int buildId)
-        {
-            var minLastUpdatedDate = start.ToString("s", DateTimeFormatInfo.CurrentInfo);
-            var maxLastUpdatedDate = end.ToString("s", DateTimeFormatInfo.CurrentInfo);
-
-            var response = await _factory.Create()
-                                         .WithPath("_apis/test/runs")
-                                         .WithQueryString($"minLastUpdatedDate={minLastUpdatedDate}&maxLastUpdatedDate={maxLastUpdatedDate}&buildIds={buildId}&$top=1")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<ResponseList<TestRun>>();
-
-            return response.Value.FirstOrDefault();
-        }
-
-        public async Task<List<TestRunCoverage>> GetTestRunCodeCoverage(int testRunId)
-        {
-            var response = await _factory.Create()
-                                         .WithPath($"_apis/test/Runs/{testRunId}/codecoverage")
-                                         .WithQueryString("flags=1")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<ResponseList<TestRunCoverage>>();
-
-            return response.Value;
-        }
+        public async Task<List<TestRunCoverage>> GetTestRunCodeCoverageAsync(int testRunId) =>
+            await _factory.Create()
+                            .WithPath($"_apis/test/Runs/{testRunId}/codecoverage")
+                            .WithQueryString("flags=1")
+                            .Get()
+                            .DeserializeResponseListAsync<TestRunCoverage>();
 
         public async Task<List<WorkItem>> GetWorkItemsAsync(List<int> workItemIds)
         {
@@ -186,50 +156,39 @@ namespace Ninjasoft.AzureDevOpsClient
                 var response = await _factory.Create()
                                              .WithPath("_apis/wit/workitems")
                                              .WithQueryString($"ids={workItemIdsStrings}")
-                                             .UsingApiVersion(DefaultApiVersion)
                                              .Get()
-                                             .DeserializeResponseAsync<ResponseList<WorkItem>>();
-                list.AddRange(response.Value);
+                                             .DeserializeResponseListAsync<WorkItem>();
+                list.AddRange(response);
             }
 
             return list;
         }
 
-        public async Task<List<WorkItemUpdate>> GetWorkItemUpdatesAsync(int workItemId)
-        {
-            var response = await _factory.Create()
-                                         .WithPath($"_apis/wit/workitems/{workItemId}/updates")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<ResponseList<WorkItemUpdate>>();
-            return response.Value;
-        }
+        public async Task<List<WorkItemUpdate>> GetWorkItemUpdatesAsync(int workItemId) =>
+            await _factory.Create()
+                            .WithPath($"_apis/wit/workitems/{workItemId}/updates")
+                            .Get()
+                            .DeserializeResponseListAsync<WorkItemUpdate>();
 
-        public async Task<WorkItem> GetWorkItemAsync(int workItemId, bool includeRelations)
+        public async Task<WorkItem> GetWorkItemAsync(int workItemId, bool includeRelations = false)
         {
             string queryString = "";
             if (includeRelations)
                 queryString += "$expand=Relations";
 
-            var response = await _factory.Create()
-                                         .WithPath($"_apis/wit/workitems/{workItemId}")
-                                         .WithQueryString(queryString)
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<WorkItem>();
-            return response;
+            return await _factory.Create()
+                                .WithPath($"_apis/wit/workitems/{workItemId}")
+                                .WithQueryString(queryString)
+                                .Get()
+                                .DeserializeResponseAsync<WorkItem>();
         }
 
-        public async Task<List<Pipeline>> GetPipelinesAsync()
-        {
-            var response = await _factory.Create()
-                                         .WithPath("_apis/pipelines")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Get()
-                                         .DeserializeResponseAsync<ResponseList<Pipeline>>();
-            return response.Value;
-        }
-
+        public async Task<GitPullRequestQuery<T>> PullRequestQueryAsync<T>(string repositoryId, GitPullRequestQueryInputList input) =>
+            await _factory.Create()
+                            .WithPath($"_apis/git/repositories/{repositoryId}/pullrequestquery")
+                            .Post(JsonConvert.SerializeObject(input))
+                            .DeserializeResponseAsync<GitPullRequestQuery<T>>();
+        
         public async Task<WorkItem> UpdateWorkItemFieldAsync(int workItemId, string fieldName, string value)
         {
             var operations = new List<Operation>
@@ -238,15 +197,12 @@ namespace Ninjasoft.AzureDevOpsClient
                                  };
             var jsonBody = JsonConvert.SerializeObject(operations);
 
-            var response = await _factory.Create()
-                                         .WithPath($"_apis/wit/workitems/{workItemId}")
-                                         .UsingApiVersion(DefaultApiVersion)
-                                         .Patch(jsonBody)
-                                         .DeserializeResponseAsync<WorkItem>();
-            return response;
+            return await _factory.Create()
+                                .WithPath($"_apis/wit/workitems/{workItemId}")
+                                .Patch(jsonBody)
+                                .DeserializeResponseAsync<WorkItem>();
         }
 
         private readonly IAzureDevOpsUrlBuilderFactory _factory;
     }
-
 }

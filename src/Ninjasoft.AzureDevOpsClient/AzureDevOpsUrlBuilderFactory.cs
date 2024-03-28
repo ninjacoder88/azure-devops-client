@@ -1,4 +1,6 @@
-﻿namespace Ninjasoft.AzureDevOpsClient
+﻿using System.Web;
+
+namespace Ninjasoft.AzureDevOpsClient
 {
     public interface IAzureDevOpsUrlBuilderFactory
     {
@@ -11,7 +13,7 @@
         {
             _personalAccessToken = personalAccessToken;
             _organization = organization;
-            _project = project;
+            _project = HttpUtility.UrlPathEncode(project);
         }
 
         public AzureDevOpsUrlBuilder Create()

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Ninjasoft.AzureDevOpsClient.Models;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -6,17 +7,25 @@ namespace Ninjasoft.AzureDevOpsClient
 {
     public class AzureDevOpsUrlBuilder
     {
-        public AzureDevOpsUrlBuilder(string personalAccessToken, string organization, string project)
+        public AzureDevOpsUrlBuilder(string personalAccessToken, string organization, string project, string apiVersion = "6.0")
         {
             _personalAccessToken = personalAccessToken;
             _organization = organization;
             _project = project;
+            _apiVersion = apiVersion;
         }
 
         public async Task<T> DeserializeResponseAsync<T>()
         {
             await _task;
             return JsonConvert.DeserializeObject<T>(_responseContent);
+        }
+
+        public async Task<List<T>> DeserializeResponseListAsync<T>()
+        {
+            await _task;
+            var list = JsonConvert.DeserializeObject<ResponseList<T>>(_responseContent);
+            return list.Value;
         }
 
         public AzureDevOpsUrlBuilder Get()
@@ -39,6 +48,17 @@ namespace Ninjasoft.AzureDevOpsClient
         public async Task<string> PatchAsync(string json)
         {
             return await PatchInternalAsync(json);
+        }
+
+        public AzureDevOpsUrlBuilder Post(string json)
+        {
+            _task = PostInternalAsync(json);
+            return this;
+        }
+
+        public async Task<string> PostAsync(string json)
+        {
+            return await PostInternalAsync(json);
         }
 
         public AzureDevOpsUrlBuilder UsingApiVersion(string version)
@@ -130,6 +150,29 @@ namespace Ninjasoft.AzureDevOpsClient
             }
         }
 
+        private async Task<string> PostInternalAsync(string json)
+        {
+            string queryString = !string.IsNullOrEmpty(_queryString) ? $"&{_queryString}" : "";
+            var url = $"https://{_subDomain}dev.azure.com/{_path}?api-version={_apiVersion}{queryString}";
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{string.Empty}:{_personalAccessToken}")));
+
+                var response = await client.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json-patch+json"));
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception($"{url}\r\n{responseContent}");
+
+                _responseContent = responseContent;
+                return responseContent;
+            }
+        }
+
         private async Task<string> GetWithRetryAsync()
         {
             int attempt = 0;
@@ -150,7 +193,7 @@ namespace Ninjasoft.AzureDevOpsClient
             }
         }
 
-        private string _apiVersion = "6.0";
+        private string _apiVersion;
         private string _path;
         private readonly string _personalAccessToken;
         private readonly string _organization;

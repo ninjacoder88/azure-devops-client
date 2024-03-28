@@ -7,5 +7,7 @@
         public string StartTime { get; set; }
 
         public string FinishTime { get; set; }
+
+        public IdentityRef RequestedFor { get; set; }
     }
 }

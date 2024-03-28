@@ -13,5 +13,11 @@ namespace Ninjasoft.AzureDevOpsClient.Models
         public ReleaseDefinition ReleaseDefinition { get; set; }
         
         public List<Artifact> Artifacts { get; set; }
+
+        public IdentityRef CreatedBy { get; set; }
+
+        public ProjectReference ProjectReference { get; set; }
+
+        public List<ReleaseEnvironment> Environments { get; set; }
     }
 }
