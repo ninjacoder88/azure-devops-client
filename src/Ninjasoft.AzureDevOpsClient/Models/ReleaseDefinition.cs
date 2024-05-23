@@ -7,6 +7,8 @@ namespace Ninjasoft.AzureDevOpsClient.Models
         public int Id { get; set; }
         
         public string Name { get; set; }
+
+        public string Path { get; set; }
         
         public List<ReleaseDefinitionEnvironment> Environments { get; set; }
     }
