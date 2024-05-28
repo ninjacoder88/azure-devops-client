@@ -120,7 +120,7 @@ namespace Ninjasoft.AzureDevOpsClient
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
-                    throw new Exception($"{url}\r\n{responseContent}");
+                    throw new Exception($"{url}\r\n{response.StatusCode} - {responseContent}");
 
                 _responseContent = responseContent;
                 return responseContent;
@@ -143,7 +143,7 @@ namespace Ninjasoft.AzureDevOpsClient
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
-                    throw new Exception($"{url}\r\n{responseContent}");
+                    throw new Exception($"{url}\r\n{response.StatusCode} - {responseContent}");
 
                 _responseContent = responseContent;
                 return responseContent;
@@ -162,11 +162,11 @@ namespace Ninjasoft.AzureDevOpsClient
                 client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{string.Empty}:{_personalAccessToken}")));
 
-                var response = await client.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json-patch+json"));
+                var response = await client.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json"));
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
-                    throw new Exception($"{url}\r\n{responseContent}");
+                    throw new Exception($"{url}\r\n{response.StatusCode} - {responseContent}");
 
                 _responseContent = responseContent;
                 return responseContent;
