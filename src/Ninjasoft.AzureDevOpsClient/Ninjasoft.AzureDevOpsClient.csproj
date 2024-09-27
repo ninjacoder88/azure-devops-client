@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Authors>Ninjasoft</Authors>
@@ -10,12 +10,12 @@
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl>https://github.com/ninjacoder88/azure-devops-client</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>Added repository method to get work items from build. Fixed bug in Post method</PackageReleaseNotes>
+    <PackageReleaseNotes>Updated to .NET 8</PackageReleaseNotes>
     <PackageIcon>transparent-ninjasoft-nuget.png</PackageIcon>
     <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-    <AssemblyVersion>1.5.1</AssemblyVersion>
-    <FileVersion>1.5.1</FileVersion>
-    <Version>1.5.1</Version>
+    <AssemblyVersion>2.0.0</AssemblyVersion>
+    <FileVersion>2.0.0</FileVersion>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
