@@ -10,7 +10,7 @@
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl>https://github.com/ninjacoder88/azure-devops-client</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>Added repository method to get work items from build. Fixed bug in Post method</PackageReleaseNotes>
+    <PackageReleaseNotes>Added additional fields to IdentityRef</PackageReleaseNotes>
     <PackageIcon>transparent-ninjasoft-nuget.png</PackageIcon>
     <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
     <AssemblyVersion>1.5.1</AssemblyVersion>
