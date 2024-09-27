@@ -13,9 +13,9 @@
     <PackageReleaseNotes>Added repository method to get work items from build. Fixed bug in Post method</PackageReleaseNotes>
     <PackageIcon>transparent-ninjasoft-nuget.png</PackageIcon>
     <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-    <AssemblyVersion>1.5.0</AssemblyVersion>
-    <FileVersion>1.5.0</FileVersion>
-    <Version>1.5.0</Version>
+    <AssemblyVersion>1.5.1</AssemblyVersion>
+    <FileVersion>1.5.1</FileVersion>
+    <Version>1.5.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
