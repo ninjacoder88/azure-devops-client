@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Ninjasoft.AzureDevOpsClient.Models;
+using Ninjasoft.AzureDevOpsClient.Repositories.Utilities;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -97,6 +98,19 @@ namespace Ninjasoft.AzureDevOpsClient
             return this;
         }
 
+        public AzureDevOpsUrlBuilder WithQueryString(Action<QueryStringBuilder>? queryStringFunc)
+        {
+            if (queryStringFunc != null)
+            {
+                QueryStringBuilder builder = new QueryStringBuilder();
+                queryStringFunc(builder);
+                string queryString = builder.Build();
+                if (!string.IsNullOrEmpty(queryString))
+                    _queryString = queryString;
+            }
+            return this;
+        }
+
         public AzureDevOpsUrlBuilder WithSubDomain(string subDomain)
         {
             _subDomain = $"{subDomain}.";
@@ -121,6 +135,15 @@ namespace Ninjasoft.AzureDevOpsClient
 
                 if (!response.IsSuccessStatusCode)
                     throw new Exception($"{url}\r\n{response.StatusCode} - {responseContent}");
+
+                if(response.Headers.TryGetValues("x-ms-continuationtoken", out IEnumerable<string>? values))
+                {
+                    string? continutationToken = values.FirstOrDefault();
+                    if(!string.IsNullOrEmpty(continutationToken))
+                    {
+                        _continuationToken = continutationToken;
+                    }
+                }
 
                 _responseContent = responseContent;
                 return responseContent;
@@ -202,5 +225,6 @@ namespace Ninjasoft.AzureDevOpsClient
         private string _responseContent;
         private string _subDomain = "";
         private Task<string> _task;
+        private string? _continuationToken;
     }
 }
