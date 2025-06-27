@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
 
 namespace Ninjasoft.AzureDevOpsClient.Models
 {
@@ -9,6 +9,11 @@ namespace Ninjasoft.AzureDevOpsClient.Models
         public string Name { get; set; }
 
         public string Path { get; set; }
+
+        public string Url { get; set; }
+
+        [JsonProperty(PropertyName = "_links")]
+        public Links Links { get; set; }
         
         public List<ReleaseDefinitionEnvironment> Environments { get; set; }
     }
