@@ -10,12 +10,14 @@ namespace Ninjasoft.AzureDevOpsClient.Models
 
         public bool IsDraft { get; set; }
 
-        public List<IdentityRefWithVote> Reviewers { get; set; }
+        public int PullRequestId { get; set; }
 
-        //public string Url {get;set;}
+        public List<IdentityRefWithVote> Reviewers { get; set; }
 
         public string Status { get; set; }
 
         public string Title { get; set; }
+
+        public string Url { get; set; }
     }
 }
