@@ -18,9 +18,14 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
         public async Task<IterationWorkItems> GetIterationWorkItemsAsync(string backlog, string iterationId) =>
             await _factory.Create()
                             .WithPath($"{Uri.EscapeDataString(backlog)}/_apis/work/teamsettings/iterations/{iterationId}/workitems")
-                            .UsingApiVersion($"6.0-preview.1")
                             .Get()
                             .DeserializeResponseAsync<IterationWorkItems>();
+
+        public async Task GetBacklogWorkItemsAsync(string backlog, string category) =>
+            await _factory.Create()
+                            .WithPath($"{backlog}/_apis/work/backlogs/{category}/workitems")
+                            .Get()
+                            .DeserializeResponseAsync<>();
 
         private readonly IAzureDevOpsUrlBuilderFactory _factory;
     }
