@@ -28,24 +28,24 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                 .Get()
                 .DeserializeResponseListAsync<Release>();
 
-        public async Task<List<Release>> GetReleasesBetweenAsync(DateTime start, DateTime end) =>
-           await _factory.Create()
+        public async Task<List<Release>> GetReleasesAsync(DateTime? start = null, DateTime? end = null)
+        {
+            Action<QueryStringBuilder>? queryStringFunc = q =>
+            {
+                if (start != null)
+                    q.Set("minCreatedTime", start.Value.ToString("s", DateTimeFormatInfo.CurrentInfo));
+                if (end != null)
+                    q.Set("maxCreatedTime", end.Value.ToString("s", DateTimeFormatInfo.CurrentInfo));
+            };
+
+            return await _factory.Create()
                 .WithSubDomain("vsrm")
                 .WithPath($"_apis/release/releases")
-                .WithQueryString(t => 
-                       t.Set("minCreatedTime", start.ToString("s", DateTimeFormatInfo.CurrentInfo))
-                        .Set("maxCreatedTime", end.ToString("s", DateTimeFormatInfo.CurrentInfo)))
+                .WithQueryString(queryStringFunc)
                 .Get()
                 .DeserializeResponseListAsync<Release>();
-
-        public async Task<List<Release>> GetReleasesAfterAsync(DateTimeOffset createdAfterDateTime) =>
-            await _factory.Create()
-                .WithSubDomain("vsrm")
-                .WithPath("_apis/release/releases")
-                .WithQueryString(t => t.Set("minCreatedTime", createdAfterDateTime.ToString("yyyy-MM-ddThh:mm:ss.fffZ")))
-                .Get()
-                .DeserializeResponseListAsync<Release>();
-
+        }
+           
         public async Task<List<ReleaseDefinition>> GetReleaseDefinitionsAsync(Action<QueryStringBuilder>? queryStringFunc = null) =>
             await _factory.Create()
                 .WithSubDomain("vsrm")
@@ -61,21 +61,26 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                 .Get()
                 .DeserializeResponseAsync<ReleaseDefinition>();
 
-        public async Task<string> GetReleaseDefinitionStringAsync(int releaseDefinitionId) =>
-            await _factory.Create()
-                .WithSubDomain("vsrm")
-                .WithPath($"_apis/release/definitions/{releaseDefinitionId}")
-                .GetAsync();
+        public async Task<List<Release>> GetReleasesForDefinitionAsync(int releaseDefinitionId, DateTimeOffset? createdAfterDateTime = null,
+            DateTimeOffset? createdBeforeDateTime = null)
+        {
+            Action<QueryStringBuilder>? queryStringFunc = (q) =>
+            {
+                q.Set("definitionId", releaseDefinitionId);
+                if (createdAfterDateTime != null)
+                    q.Set("minCreatedTime", createdAfterDateTime.Value.ToString("yyyy-MM-ddThh:mm:ss.fffZ"));
+                if (createdBeforeDateTime != null)
+                    q.Set("maxCreatedTime", createdBeforeDateTime.Value.ToString("yyyy-MM-ddThh:mm:ss.fffZ"));
+            };
 
-        public async Task<List<Release>> GetReleasesForDefinitionAsync(int releaseDefinitionId, DateTimeOffset createdAfterDateTime) =>
-            await _factory.Create()
+            return await _factory.Create()
                 .WithSubDomain("vsrm")
                 .WithPath("_apis/release/releases")
-                .WithQueryString(t => 
-                    t.Set("definitionId", releaseDefinitionId)
-                    .Set("minCreatedTime", createdAfterDateTime.ToString("yyyy-MM-ddThh:mm:ss.fffZ")))
+                .WithQueryString(queryStringFunc)
                 .Get()
                 .DeserializeResponseListAsync<Release>();
+        }
+            
 
         private readonly IAzureDevOpsUrlBuilderFactory _factory;
     }
