@@ -4,13 +4,8 @@ using System.Globalization;
 
 namespace Ninjasoft.AzureDevOpsClient.Repositories
 {    
-    public class ReleaseApiRepository
+    public class ReleaseApiRepository(IAzureDevOpsUrlBuilderFactory _factory)
     {
-        public ReleaseApiRepository(IAzureDevOpsUrlBuilderFactory factory)
-        {
-            _factory = factory;
-        }
-
         public async Task<Release> GetReleaseAsync(int releaseId, Action<QueryStringBuilder>? queryStringFunc = null) =>
             await _factory.Create()
                 .WithSubDomain("vsrm")
@@ -80,8 +75,5 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                 .Get()
                 .DeserializeResponseListAsync<Release>();
         }
-            
-
-        private readonly IAzureDevOpsUrlBuilderFactory _factory;
     }
 }

@@ -2,13 +2,8 @@
 
 namespace Ninjasoft.AzureDevOpsClient.Repositories
 {
-    public class WorkApiRepository
+    public class WorkApiRepository(IAzureDevOpsUrlBuilderFactory _factory)
     {
-        public WorkApiRepository(IAzureDevOpsUrlBuilderFactory factory)
-        {
-            _factory = factory;
-        }
-
         public async Task<List<TeamSettingsIteration>> GetIterationsAsync(string backlog) =>
             await _factory.Create()
                             .WithPath($"{Uri.EscapeDataString(backlog)}/_apis/work/teamsettings/iterations")
@@ -21,12 +16,11 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                             .Get()
                             .DeserializeResponseAsync<IterationWorkItems>();
 
-        public async Task GetBacklogWorkItemsAsync(string backlog, string category) =>
+        public async Task<BacklogWorkItems> GetBacklogWorkItemsAsync(string backlog, string category) =>
             await _factory.Create()
                             .WithPath($"{backlog}/_apis/work/backlogs/{category}/workitems")
                             .Get()
-                            .DeserializeResponseAsync<>();
+                            .DeserializeResponseAsync<BacklogWorkItems>();
 
-        private readonly IAzureDevOpsUrlBuilderFactory _factory;
     }
 }

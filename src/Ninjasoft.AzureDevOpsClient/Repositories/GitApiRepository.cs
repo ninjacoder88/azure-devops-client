@@ -3,13 +3,8 @@ using Ninjasoft.AzureDevOpsClient.Models;
 
 namespace Ninjasoft.AzureDevOpsClient.Repositories
 {
-    public class GitApiRepository
+    public class GitApiRepository(IAzureDevOpsUrlBuilderFactory _factory)
     {
-        public GitApiRepository(IAzureDevOpsUrlBuilderFactory factory)
-        {
-            _factory = factory;
-        }
-
         public async Task<List<GitPullRequest>> GetActivePullRequestsForRepositoryAsync(string repositoryId) =>
             await _factory.Create()
                             .WithPath($"_apis/git/repositories/{Uri.EscapeDataString(repositoryId)}/pullrequests")
@@ -23,6 +18,12 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                             .Get()
                             .DeserializeResponseListAsync<ResourceRef>();
 
+        public async Task<GitRepository> GetRepositoryByIdAsync(string repositoryId) =>
+            await _factory.Create()
+                            .WithPath($"/_apis/git/repositories/{repositoryId}")
+                            .Get()
+                            .DeserializeResponseAsync<GitRepository>();
+
         public async Task<List<GitRepository>> GetRepositoriesForProjectAsync() =>
             await _factory.Create()
                             .WithPath("/_apis/git/repositories")
@@ -34,7 +35,5 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                             .WithPath($"_apis/git/repositories/{repositoryId}/pullrequestquery")
                             .Post(JsonConvert.SerializeObject(input))
                             .DeserializeResponseAsync<GitPullRequestQuery<T>>();
-
-        private readonly IAzureDevOpsUrlBuilderFactory _factory;
     }
 }

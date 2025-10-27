@@ -2,13 +2,8 @@
 
 namespace Ninjasoft.AzureDevOpsClient.Repositories
 {
-    public class BuildApiRepository
+    public class BuildApiRepository(IAzureDevOpsUrlBuilderFactory _factory)
     {
-        public BuildApiRepository(IAzureDevOpsUrlBuilderFactory factory)
-        {
-            _factory = factory;
-        }
-
         public async Task<Build> GetBuildAsync(int buildId) =>
             await _factory.Create()
                             .WithPath($"_apis/build/builds/{buildId}")
@@ -26,7 +21,5 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                             .WithPath($"_apis/build/builds/{buildId}/workItems")
                             .Get()
                             .DeserializeResponseListAsync<ResourceRef>();
-
-        private readonly IAzureDevOpsUrlBuilderFactory _factory;
     }
 }

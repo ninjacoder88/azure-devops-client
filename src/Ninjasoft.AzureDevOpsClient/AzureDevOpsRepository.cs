@@ -4,13 +4,8 @@ using Ninjasoft.AzureDevOpsClient.Repositories;
 
 namespace Ninjasoft.AzureDevOpsClient
 {
-    public class AzureDevOpsRepository
+    public class AzureDevOpsRepository(IAzureDevOpsUrlBuilderFactory _factory)
     {
-        public AzureDevOpsRepository(IAzureDevOpsUrlBuilderFactory factory)
-        {
-            _factory = factory;
-        }
-
         public BuildApiRepository Build
         {
             get => _build ?? (_build = new BuildApiRepository(_factory));
@@ -97,6 +92,5 @@ namespace Ninjasoft.AzureDevOpsClient
         private WorkApiRepository? _work;
         private PipelinesApiRepository? _pipelines;
         private ProjectsApiRepository? _projects;
-        private readonly IAzureDevOpsUrlBuilderFactory _factory;
     }
 }

@@ -4,13 +4,8 @@ using Ninjasoft.AzureDevOpsClient.Models;
 
 namespace Ninjasoft.AzureDevOpsClient.Repositories
 {
-    public class WorkItemTrackApiRepsository
+    public class WorkItemTrackApiRepsository(IAzureDevOpsUrlBuilderFactory _factory)
     {
-        public WorkItemTrackApiRepsository(IAzureDevOpsUrlBuilderFactory factory)
-        {
-            _factory = factory;
-        }
-
         public async Task<List<WorkItem>> GetWorkItemsAsync(List<int> workItemIds)
         {
             var batchedWorkItemIds = workItemIds.Batch(200);
@@ -66,7 +61,5 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                                 .Patch(jsonBody)
                                 .DeserializeResponseAsync<WorkItem>();
         }
-
-        private readonly IAzureDevOpsUrlBuilderFactory _factory;
     }
 }

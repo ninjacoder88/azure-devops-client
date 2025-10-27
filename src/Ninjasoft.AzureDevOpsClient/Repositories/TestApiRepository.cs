@@ -4,13 +4,8 @@ using System.Globalization;
 
 namespace Ninjasoft.AzureDevOpsClient.Repositories
 {
-    public class TestApiRepository
+    public class TestApiRepository(IAzureDevOpsUrlBuilderFactory _factory)
     {
-        public TestApiRepository(IAzureDevOpsUrlBuilderFactory factory)
-        {
-            _factory = factory;
-        }
-
         public async Task<List<TestCaseResult>> GetTestCaseResultsAsync(int testRunId) =>
             await _factory.Create()
                             .WithPath($"_apis/test/runs/{testRunId}/results")
@@ -37,7 +32,5 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                             .WithQueryString($"buildId={buildId}&flags=1")
                             .Get()
                             .DeserializeResponseListAsync<TestRunCoverage>();
-
-        private readonly IAzureDevOpsUrlBuilderFactory _factory;
     }
 }

@@ -6,4 +6,9 @@
         public WorkItemReference? Source { get; set; }
         public WorkItemReference? Target { get; set; }
     }
+
+    public class BacklogWorkItems
+    {
+        public List<BacklogLevelWorkItem> WorkItems { get; set; }
+    }
 }
