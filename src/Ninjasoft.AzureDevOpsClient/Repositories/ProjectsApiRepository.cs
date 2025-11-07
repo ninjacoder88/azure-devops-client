@@ -6,7 +6,7 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
     {
         public async Task<List<TeamProjectReference>> GetProjectsForOrganizationAsync() =>
             await _factory.Create()
-                            .WithPath("_apis/projects")
+                            .WithPath("_apis/projects", includeProject: false)
                             .Get()
                             .DeserializeResponseListAsync<TeamProjectReference>();
     }
