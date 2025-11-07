@@ -25,7 +25,7 @@ namespace Ninjasoft.AzureDevOpsClient
         public async Task<List<T>> DeserializeResponseListAsync<T>()
         {
             await _task;
-            var list = JsonConvert.DeserializeObject<ResponseList<T>>(_responseContent);
+            ResponseList<T> list = JsonConvert.DeserializeObject<ResponseList<T>>(_responseContent);
             return list.Value;
         }
 

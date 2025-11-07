@@ -4,8 +4,34 @@ using Ninjasoft.AzureDevOpsClient.Repositories;
 
 namespace Ninjasoft.AzureDevOpsClient
 {
-    public class AzureDevOpsRepository(IAzureDevOpsUrlBuilderFactory _factory)
+    public interface IAzureDevOpsRepository
     {
+        BuildApiRepository Build { get; }
+
+        GitApiRepository Git { get; }
+
+        PipelinesApiRepository Pipelines { get; }
+
+        ProjectsApiRepository Projects { get; }
+
+        ReleaseApiRepository Release { get; }
+
+        TestApiRepository Test { get; }
+
+        WorkApiRepository Work { get; }
+
+        WorkItemTrackApiRepsository WorkItemTracking { get; }
+
+        Task<List<ResourceRef>> GetWorkItemsFromBuildAsync(int buildId, string repositoryId);
+    }
+
+    public class AzureDevOpsRepository(IAzureDevOpsUrlBuilderFactory _factory) : IAzureDevOpsRepository
+    {
+        public AzureDevOpsRepository(string personalAccessToken, string organization, string projectName = "")
+            : this(new AzureDevOpsUrlBuilderFactory(personalAccessToken, organization, projectName))
+        {
+        }
+
         public BuildApiRepository Build
         {
             get => _build ?? (_build = new BuildApiRepository(_factory));
