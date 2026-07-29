@@ -18,14 +18,18 @@ namespace Ninjasoft.AzureDevOpsClient
 
         public async Task<T?> DeserializeResponseAsync<T>()
         {
-            await _task;
-            return JsonConvert.DeserializeObject<T>(_responseContent);
+            string? responseContent = await _task;
+            if(responseContent == null)
+                return default;
+            return JsonConvert.DeserializeObject<T>(responseContent);
         }
 
         public async Task<List<T>> DeserializeResponseListAsync<T>()
         {
-            await _task;
-            ResponseList<T>? list = JsonConvert.DeserializeObject<ResponseList<T>>(_responseContent);
+            string? responseContent = await _task;
+            if(responseContent == null)
+                return [];
+            ResponseList<T>? list = JsonConvert.DeserializeObject<ResponseList<T>>(responseContent);
             return list?.Value ?? [];
         }
 
@@ -35,7 +39,7 @@ namespace Ninjasoft.AzureDevOpsClient
             return this;
         }
 
-        public async Task<string> GetAsync() => await GetWithRetryAsync();
+        public async Task<string?> GetAsync() => await GetWithRetryAsync();
 
         public AzureDevOpsUrlBuilder Patch(string json)
         {
@@ -43,7 +47,7 @@ namespace Ninjasoft.AzureDevOpsClient
             return this;
         }
 
-        public async Task<string> PatchAsync(string json)
+        public async Task<string?> PatchAsync(string json)
         {
             return await PatchInternalAsync(json);
         }
@@ -54,7 +58,7 @@ namespace Ninjasoft.AzureDevOpsClient
             return this;
         }
 
-        public async Task<string> PostAsync(string json)
+        public async Task<string?> PostAsync(string json)
         {
             return await PostInternalAsync(json);
         }
@@ -114,7 +118,7 @@ namespace Ninjasoft.AzureDevOpsClient
             return this;
         }
 
-        private async Task<string> HttpInternalAsync(Func<HttpClient, string, Task<HttpResponseMessage>> func, Action<HttpResponseMessage>? postResponseAction = null)
+        private async Task<string?> HttpInternalAsync(Func<HttpClient, string, Task<HttpResponseMessage>> func, Action<HttpResponseMessage>? postResponseAction = null)
         {
             string queryString = !string.IsNullOrEmpty(_queryString) ? $"&{_queryString}" : "";
             string url = $"https://{_subDomain}dev.azure.com/{_path}?api-version={_apiVersion}{queryString}";
@@ -132,15 +136,14 @@ namespace Ninjasoft.AzureDevOpsClient
                 if (!response.IsSuccessStatusCode)
                     throw new Exception($"{url}\r\n{response.StatusCode} - {responseContent}");
 
-                if(postResponseAction != null)
-                    postResponseAction(response);
+                postResponseAction?.Invoke(response);
 
-                _responseContent = responseContent;
+                //_responseContent = responseContent;
                 return responseContent;
             }
         }
 
-        private async Task<string> GetInternalAsync()
+        private async Task<string?> GetInternalAsync()
         {
             Func<HttpClient, string, Task<HttpResponseMessage>> func = async (client, url) => await client.GetAsync(url);
             Action<HttpResponseMessage> action = response =>
@@ -158,14 +161,14 @@ namespace Ninjasoft.AzureDevOpsClient
             return await HttpInternalAsync(func, action);
         }
 
-        private async Task<string> PatchInternalAsync(string json) => await HttpInternalAsync(async (client, url) => 
+        private async Task<string?> PatchInternalAsync(string json) => await HttpInternalAsync(async (client, url) => 
             await client.PatchAsync(url, new StringContent(json, Encoding.UTF8, "application/json-patch+json")));
 
-        private async Task<string> PostInternalAsync(string json) =>
+        private async Task<string?> PostInternalAsync(string json) =>
             await HttpInternalAsync(async (client, url) => 
             await client.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json")));
 
-        private async Task<string> GetWithRetryAsync()
+        private async Task<string?> GetWithRetryAsync()
         {
             for(int i = 0; i < 5; i++)
             {
@@ -190,9 +193,9 @@ namespace Ninjasoft.AzureDevOpsClient
         private readonly string _organization;
         private readonly string _project;
         private string _queryString;
-        private string _responseContent;
+        //private string? _responseContent;
         private string _subDomain = "";
-        private Task<string> _task;
+        private Task<string?> _task;
         private string? _continuationToken;
     }
 }

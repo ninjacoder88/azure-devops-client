@@ -6,7 +6,7 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
 {    
     public class ReleaseApiRepository(IAzureDevOpsUrlBuilderFactory _factory)
     {
-        public async Task<Release> GetReleaseAsync(int releaseId, Action<QueryStringBuilder>? queryStringFunc = null) =>
+        public async Task<Release?> GetReleaseAsync(int releaseId, Action<QueryStringBuilder>? queryStringFunc = null) =>
             await _factory.Create()
                 .WithSubDomain("vsrm")
                 .WithPath($"_apis/release/releases/{releaseId}")
@@ -49,7 +49,7 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                 .Get()
                 .DeserializeResponseListAsync<ReleaseDefinition>();
 
-        public async Task<ReleaseDefinition> GetReleaseDefinitionAsync(int releaseDefinitionId) =>
+        public async Task<ReleaseDefinition?> GetReleaseDefinitionAsync(int releaseDefinitionId) =>
             await _factory.Create()
                 .WithSubDomain("vsrm")
                 .WithPath($"_apis/release/definitions/{releaseDefinitionId}")

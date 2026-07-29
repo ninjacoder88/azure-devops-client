@@ -18,7 +18,7 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                             .Get()
                             .DeserializeResponseListAsync<ResourceRef>();
 
-        public async Task<GitRepository> GetRepositoryByIdAsync(string repositoryId) =>
+        public async Task<GitRepository?> GetRepositoryByIdAsync(string repositoryId) =>
             await _factory.Create()
                             .WithPath($"/_apis/git/repositories/{repositoryId}")
                             .Get()
@@ -30,13 +30,13 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                             .Get()
                             .DeserializeResponseListAsync<GitRepository>();
 
-        public async Task<GitPullRequest> GetPullRequestByIdAsync(int pullRequestId) =>
+        public async Task<GitPullRequest?> GetPullRequestByIdAsync(int pullRequestId) =>
             await _factory.Create()
                             .WithPath($"/_apis/git/pullrequests/{pullRequestId}")
                             .Get()
                             .DeserializeResponseAsync<GitPullRequest>();
 
-        public async Task<GitPullRequestQuery<T>> PullRequestQueryAsync<T>(string repositoryId, GitPullRequestQueryInputList input) =>
+        public async Task<GitPullRequestQuery<T>?> PullRequestQueryAsync<T>(string repositoryId, GitPullRequestQueryInputList input) =>
             await _factory.Create()
                             .WithPath($"_apis/git/repositories/{repositoryId}/pullrequestquery")
                             .Post(JsonConvert.SerializeObject(input))

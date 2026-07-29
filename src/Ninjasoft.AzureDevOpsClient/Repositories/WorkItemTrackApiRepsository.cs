@@ -7,9 +7,9 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
     {
         public async Task<List<WorkItem>> GetWorkItemsAsync(List<int> workItemIds)
         {
-            var batchedWorkItemIds = workItemIds.Chunk(200);
+            IEnumerable<int[]> batchedWorkItemIds = workItemIds.Chunk(200);
 
-            var list = new List<WorkItem>();
+            List<WorkItem> list = [];
             foreach (var batchOfWorkItemIds in batchedWorkItemIds)
             {
                 string workItemIdsStrings = string.Join(",", batchOfWorkItemIds);
@@ -30,7 +30,7 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                             .Get()
                             .DeserializeResponseListAsync<WorkItemUpdate>();
 
-        public async Task<WorkItem> GetWorkItemAsync(int workItemId, bool includeRelations = false)
+        public async Task<WorkItem?> GetWorkItemAsync(int workItemId, bool includeRelations = false)
         {
             string queryString = "";
             if (includeRelations)
@@ -43,13 +43,13 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                                 .DeserializeResponseAsync<WorkItem>();
         }
 
-        public async Task<WorkItem> UpdateWorkItemFieldAsync(int workItemId, string fieldName, string value)
+        public async Task<WorkItem?> UpdateWorkItemFieldAsync(int workItemId, string fieldName, string value)
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string> { { fieldName, value } };
+            Dictionary<string, string> dictionary = new() { { fieldName, value } };
             return await UpdateWorkItemFieldAsync(workItemId, dictionary);
         }
 
-        public async Task<WorkItem> UpdateWorkItemFieldAsync(int workItemId, Dictionary<string, string> fieldDictionary)
+        public async Task<WorkItem?> UpdateWorkItemFieldAsync(int workItemId, Dictionary<string, string> fieldDictionary)
         {
             List<Operation> operations = fieldDictionary.Select(x => new Operation { op = "replace", path = $"/fields/{x.Key}", value = x.Value }).ToList();
 

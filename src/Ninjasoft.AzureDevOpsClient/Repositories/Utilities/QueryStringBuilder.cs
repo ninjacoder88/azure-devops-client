@@ -4,7 +4,7 @@
     {
         public QueryStringBuilder()
         {
-            _queryParameters = new Dictionary<string, string>();
+            _queryParameters = [];
         }
 
         public QueryStringBuilder Set(string key, string value)

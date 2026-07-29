@@ -34,43 +34,43 @@ namespace Ninjasoft.AzureDevOpsClient
 
         public BuildApiRepository Build
         {
-            get => _build ?? (_build = new BuildApiRepository(_factory));
+            get => _build ??= new BuildApiRepository(_factory);
             private set => _build = value;
         }
 
         public GitApiRepository Git
         {
-            get => _git ?? (_git = new GitApiRepository(_factory));
+            get => _git ??= new GitApiRepository(_factory);
             private set => _git = value;
         }
 
         public PipelinesApiRepository Pipelines
         {
-            get => _pipelines ?? (_pipelines = new PipelinesApiRepository(_factory));
+            get => _pipelines ??= new PipelinesApiRepository(_factory);
             private set => _pipelines = value;
         }
 
         public ProjectsApiRepository Projects
         {
-            get => _projects ?? (_projects = new ProjectsApiRepository(_factory));
+            get => _projects ??= new ProjectsApiRepository(_factory);
             private set => _projects = value;
         }
 
         public ReleaseApiRepository Release
         {
-            get => _release ?? (_release = new ReleaseApiRepository(_factory));
+            get => _release ??= new ReleaseApiRepository(_factory);
             private set => _release = value;
         }
 
         public TestApiRepository Test
         {
-            get => _test ?? (_test = new TestApiRepository(_factory));
+            get => _test ??= new TestApiRepository(_factory);
             private set => _test = value;
         }
 
         public WorkApiRepository Work
         {
-            get => _work ?? (_work =  new WorkApiRepository(_factory));
+            get => _work ??=  new WorkApiRepository(_factory);
             private set => _work = value;
         }
 
@@ -88,19 +88,19 @@ namespace Ninjasoft.AzureDevOpsClient
 
             GitPullRequestQueryInputList pullRequestQueryList = new()
             {
-                Queries = new List<GitPullRequestQueryInput>
-                {
+                Queries =
+                [
                     new GitPullRequestQueryInput
                     {
                         Type = Constants.GitPullRequestQueryType.Commit,
                         Items = commitIds
                     }
-                }
+                ]
             };
 
             var pullRequestQueryResult = await Git.PullRequestQueryAsync<PullRequestQueryResult>(repositoryId, pullRequestQueryList);
 
-            List<ResourceRef> workItemResourceRefs = new List<ResourceRef>();
+            List<ResourceRef> workItemResourceRefs = [];
             foreach (int pullRequestId in pullRequestQueryResult.ExtractPullRequestIds())
                 workItemResourceRefs.AddRange(await Git.GetPullRequestWorkItemsAsync(repositoryId, pullRequestId));
 
