@@ -82,11 +82,11 @@ namespace Ninjasoft.AzureDevOpsClient
 
         public async Task<List<ResourceRef>> GetWorkItemsFromBuildAsync(int buildId, string repositoryId)
         {
-            var buildChanges = await Build.GetBuildChangesAsync(buildId);
+            List<Change> buildChanges = await Build.GetBuildChangesAsync(buildId);
 
-            var commitIds = buildChanges.Where(x => x.Type == "TfsGit").Select(x => x.Id).ToList();
+            List<string> commitIds = buildChanges.Where(x => x.Type == "TfsGit").Select(x => x.Id).ToList();
 
-            var pullRequestQueryList = new GitPullRequestQueryInputList
+            GitPullRequestQueryInputList pullRequestQueryList = new()
             {
                 Queries = new List<GitPullRequestQueryInput>
                 {
@@ -101,11 +101,8 @@ namespace Ninjasoft.AzureDevOpsClient
             var pullRequestQueryResult = await Git.PullRequestQueryAsync<PullRequestQueryResult>(repositoryId, pullRequestQueryList);
 
             List<ResourceRef> workItemResourceRefs = new List<ResourceRef>();
-            foreach (var pullRequestId in pullRequestQueryResult.ExtractPullRequestIds())
-            {
-                var workItemRefs = await Git.GetPullRequestWorkItemsAsync(repositoryId, pullRequestId);
-                workItemResourceRefs.AddRange(workItemRefs);
-            }
+            foreach (int pullRequestId in pullRequestQueryResult.ExtractPullRequestIds())
+                workItemResourceRefs.AddRange(await Git.GetPullRequestWorkItemsAsync(repositoryId, pullRequestId));
 
             return workItemResourceRefs;
         }

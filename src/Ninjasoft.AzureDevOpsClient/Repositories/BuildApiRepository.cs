@@ -10,6 +10,14 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                             .Get()
                             .DeserializeResponseAsync<Build>();
 
+        // public async Task<Build> GetBuildV2Async(int buildId)
+        // {
+        //     new AzureDevOpsUrlBuilderV2("", "")
+        //         .SetPath($"_apis/build/builds/{buildId}")
+        //         .Get()
+        //         .DeserializeResponseAsync<Build>();
+        // }
+
         public async Task<List<Change>> GetBuildChangesAsync(int buildId) =>
             await _factory.Create()
                             .WithPath($"_apis/build/builds/{buildId}/changes")

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
+﻿using System.Text.Json;
 
 namespace Ninjasoft.AzureDevOpsClient.Models
 {
@@ -7,10 +6,10 @@ namespace Ninjasoft.AzureDevOpsClient.Models
     {
         public int Id { get; set; }
 
-        public IdentityRef RevisedBy { get; set; }
+        public IdentityRef RevisedBy { get; set; } = null!;
 
-        public string RevisedDate { get; set; }
+        public string RevisedDate { get; set; } = string.Empty;
 
-        public Dictionary<string, JObject> Fields { get; set; }
+        public Dictionary<string, JsonElement> Fields { get; set; } = null!;
     }
 }

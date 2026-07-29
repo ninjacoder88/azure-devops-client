@@ -10,17 +10,17 @@
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl>https://github.com/ninjacoder88/azure-devops-client</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>Add new constants and models to support new methods. New methods include getting PR by id and getting backlog work items</PackageReleaseNotes>
+    <PackageReleaseNotes>Rollback to Newtonsoft.Json as System.Text.Json doesn't support certain objects</PackageReleaseNotes>
     <PackageIcon>transparent-ninjasoft-nuget.png</PackageIcon>
     <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-    <AssemblyVersion>2.2.0</AssemblyVersion>
-    <FileVersion>2.2.0</FileVersion>
-    <Version>2.2.0</Version>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <AssemblyVersion>2.3.5</AssemblyVersion>
+    <FileVersion>2.3.5</FileVersion>
+    <Version>2.3.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="morelinq" Version="3.4.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +29,10 @@
       <PackagePath>\</PackagePath>
     </None>
     <None Update="transparent-ninjasoft-nuget.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

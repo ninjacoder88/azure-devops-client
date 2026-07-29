@@ -1,14 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using System.Net.Http.Headers;
+using System.Text;
+using Newtonsoft.Json;
 using Ninjasoft.AzureDevOpsClient.Models;
 using Ninjasoft.AzureDevOpsClient.Repositories.Utilities;
-using System.Net.Http.Headers;
-using System.Text;
 
 namespace Ninjasoft.AzureDevOpsClient
 {
     public class AzureDevOpsUrlBuilder
     {
-        public AzureDevOpsUrlBuilder(string personalAccessToken, string organization, string project, string apiVersion = "6.0")
+        public AzureDevOpsUrlBuilder(string personalAccessToken, string organization, string project, string apiVersion = "7.1")
         {
             _personalAccessToken = personalAccessToken;
             _organization = organization;
@@ -16,7 +16,7 @@ namespace Ninjasoft.AzureDevOpsClient
             _apiVersion = apiVersion;
         }
 
-        public async Task<T> DeserializeResponseAsync<T>()
+        public async Task<T?> DeserializeResponseAsync<T>()
         {
             await _task;
             return JsonConvert.DeserializeObject<T>(_responseContent);
@@ -25,8 +25,8 @@ namespace Ninjasoft.AzureDevOpsClient
         public async Task<List<T>> DeserializeResponseListAsync<T>()
         {
             await _task;
-            ResponseList<T> list = JsonConvert.DeserializeObject<ResponseList<T>>(_responseContent);
-            return list.Value;
+            ResponseList<T>? list = JsonConvert.DeserializeObject<ResponseList<T>>(_responseContent);
+            return list?.Value ?? [];
         }
 
         public AzureDevOpsUrlBuilder Get()
@@ -35,10 +35,7 @@ namespace Ninjasoft.AzureDevOpsClient
             return this;
         }
 
-        public async Task<string> GetAsync()
-        {
-            return await GetWithRetryAsync();
-        }
+        public async Task<string> GetAsync() => await GetWithRetryAsync();
 
         public AzureDevOpsUrlBuilder Patch(string json)
         {
@@ -117,103 +114,74 @@ namespace Ninjasoft.AzureDevOpsClient
             return this;
         }
 
+        private async Task<string> HttpInternalAsync(Func<HttpClient, string, Task<HttpResponseMessage>> func, Action<HttpResponseMessage>? postResponseAction = null)
+        {
+            string queryString = !string.IsNullOrEmpty(_queryString) ? $"&{_queryString}" : "";
+            string url = $"https://{_subDomain}dev.azure.com/{_path}?api-version={_apiVersion}{queryString}";
+
+            using (HttpClient client = new())
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{string.Empty}:{_personalAccessToken}")));
+
+                HttpResponseMessage response = await func(client, url);
+                string? responseContent = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception($"{url}\r\n{response.StatusCode} - {responseContent}");
+
+                if(postResponseAction != null)
+                    postResponseAction(response);
+
+                _responseContent = responseContent;
+                return responseContent;
+            }
+        }
+
         private async Task<string> GetInternalAsync()
         {
-            string queryString = !string.IsNullOrEmpty(_queryString) ? $"&{_queryString}" : "";
-            var url = $"https://{_subDomain}dev.azure.com/{_path}?api-version={_apiVersion}{queryString}";
-
-            using (var client = new HttpClient())
+            Func<HttpClient, string, Task<HttpResponseMessage>> func = async (client, url) => await client.GetAsync(url);
+            Action<HttpResponseMessage> action = response =>
             {
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                var authString = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{string.Empty}:{_personalAccessToken}"));
-                client.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Basic", authString);
-
-                var response = await client.GetAsync(url);
-                var responseContent = await response.Content.ReadAsStringAsync();
-
-                if (!response.IsSuccessStatusCode)
-                    throw new Exception($"{url}\r\n{response.StatusCode} - {responseContent}");
-
-                if(response.Headers.TryGetValues("x-ms-continuationtoken", out IEnumerable<string>? values))
+                if (response.Headers.TryGetValues("x-ms-continuationtoken", out IEnumerable<string>? values))
                 {
                     string? continutationToken = values.FirstOrDefault();
-                    if(!string.IsNullOrEmpty(continutationToken))
-                    {
+                    if (!string.IsNullOrEmpty(continutationToken))
                         _continuationToken = continutationToken;
-                    }
+                    else
+                        _continuationToken = null;
                 }
+            };
 
-                _responseContent = responseContent;
-                return responseContent;
-            }
+            return await HttpInternalAsync(func, action);
         }
 
-        private async Task<string> PatchInternalAsync(string json)
-        {
-            string queryString = !string.IsNullOrEmpty(_queryString) ? $"&{_queryString}" : "";
-            var url = $"https://{_subDomain}dev.azure.com/{_path}?api-version={_apiVersion}{queryString}";
+        private async Task<string> PatchInternalAsync(string json) => await HttpInternalAsync(async (client, url) => 
+            await client.PatchAsync(url, new StringContent(json, Encoding.UTF8, "application/json-patch+json")));
 
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{string.Empty}:{_personalAccessToken}")));
-
-                var response = await client.PatchAsync(url, new StringContent(json, Encoding.UTF8, "application/json-patch+json"));
-                var responseContent = await response.Content.ReadAsStringAsync();
-
-                if (!response.IsSuccessStatusCode)
-                    throw new Exception($"{url}\r\n{response.StatusCode} - {responseContent}");
-
-                _responseContent = responseContent;
-                return responseContent;
-            }
-        }
-
-        private async Task<string> PostInternalAsync(string json)
-        {
-            string queryString = !string.IsNullOrEmpty(_queryString) ? $"&{_queryString}" : "";
-            var url = $"https://{_subDomain}dev.azure.com/{_path}?api-version={_apiVersion}{queryString}";
-
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{string.Empty}:{_personalAccessToken}")));
-
-                var response = await client.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json"));
-                var responseContent = await response.Content.ReadAsStringAsync();
-
-                if (!response.IsSuccessStatusCode)
-                    throw new Exception($"{url}\r\n{response.StatusCode} - {responseContent}");
-
-                _responseContent = responseContent;
-                return responseContent;
-            }
-        }
+        private async Task<string> PostInternalAsync(string json) =>
+            await HttpInternalAsync(async (client, url) => 
+            await client.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json")));
 
         private async Task<string> GetWithRetryAsync()
         {
-            int attempt = 0;
-            while (true)
+            for(int i = 0; i < 5; i++)
             {
-                await Task.Delay(attempt * 3000);
+                await Task.Delay(i * 250);
 
                 try
                 {
-                    attempt++;
                     return await GetInternalAsync();
                 }
                 catch
                 {
-                    if (attempt == 5)
+                    if (i == 5)
                         throw;
                 }
             }
+            return null;
         }
 
         private string _apiVersion;

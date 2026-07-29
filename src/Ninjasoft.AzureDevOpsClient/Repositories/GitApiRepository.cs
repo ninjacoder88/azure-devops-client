@@ -30,6 +30,12 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
                             .Get()
                             .DeserializeResponseListAsync<GitRepository>();
 
+        public async Task<GitPullRequest> GetPullRequestByIdAsync(int pullRequestId) =>
+            await _factory.Create()
+                            .WithPath($"/_apis/git/pullrequests/{pullRequestId}")
+                            .Get()
+                            .DeserializeResponseAsync<GitPullRequest>();
+
         public async Task<GitPullRequestQuery<T>> PullRequestQueryAsync<T>(string repositoryId, GitPullRequestQueryInputList input) =>
             await _factory.Create()
                             .WithPath($"_apis/git/repositories/{repositoryId}/pullrequestquery")

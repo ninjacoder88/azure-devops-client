@@ -5,43 +5,31 @@ namespace Ninjasoft.AzureDevOpsClient.Extensions
 {
     public static class WorkItemExtensions
     {
-        public static T GetFieldValue<T>(this WorkItem workItem, string fieldName) where T : class
+        public static T? GetFieldValue<T>(this WorkItem workItem, string fieldName) where T : class
         {
-            if (!workItem.Fields.TryGetValue(fieldName, out object fieldObject))
+            if (!workItem.Fields.TryGetValue(fieldName, out object? fieldObject))
                 return default;
 
-            var fieldObjectType = fieldObject.GetType();
-
-            if (fieldObjectType == typeof(JObject))
-            {
-                var jobject = fieldObject as JObject;
-
-                return jobject.ToObject<T>();
-            }
+            if (fieldObject is JObject jObject)
+                return jObject.ToObject<T>();
 
             return fieldObject as T;
         }
 
-        public static T GetFieldValueAsStruct<T>(this WorkItem workItem, string fieldName) where T : struct
+        public static T? GetFieldValueAsStruct<T>(this WorkItem workItem, string fieldName) where T : struct
         {
-            if (!workItem.Fields.TryGetValue(fieldName, out object fieldObject))
+            if (!workItem.Fields.TryGetValue(fieldName, out object? fieldObject))
                 return default;
 
-            var fieldObjectType = fieldObject.GetType();
-
-            if (fieldObjectType == typeof(JObject))
-            {
-                var jobject = fieldObject as JObject;
-
-                return jobject.ToObject<T>();
-            }
+            if (fieldObject is JObject jObject)
+                return jObject.ToObject<T>();
 
             return (T)fieldObject;
         }
 
-        public static string GetFieldValueAsString(this WorkItem workItem, string fieldName)
+        public static string? GetFieldValueAsString(this WorkItem workItem, string fieldName)
         {
-            if (!workItem.Fields.TryGetValue(fieldName, out object fieldObject))
+            if (!workItem.Fields.TryGetValue(fieldName, out object? fieldObject))
                 return default;
 
             return fieldObject.ToString();
@@ -49,14 +37,15 @@ namespace Ninjasoft.AzureDevOpsClient.Extensions
 
         public static DateTime? GetFieldValueAsDateTime(this WorkItem workItem, string fieldName)
         {
-            var fieldValue = workItem.GetFieldValueAsString(fieldName);
-
-            return DateTime.Parse(fieldValue);
+            string? fieldValue = workItem.GetFieldValueAsString(fieldName);
+            if(DateTime.TryParse(fieldValue, out DateTime dateTime))
+                return dateTime;
+            return null;
         }
 
         public static decimal? GetFieldValueAsDecimal(this WorkItem workItem, string fieldName)
         {
-            var fieldValue = workItem.GetFieldValueAsString(fieldName);
+            string? fieldValue = workItem.GetFieldValueAsString(fieldName);
 
             if (decimal.TryParse(fieldValue, out decimal value))
                 return value;

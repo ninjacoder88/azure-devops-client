@@ -10,7 +10,9 @@ namespace Ninjasoft.AzureDevOpsClient
     public class AzureDevOpsUrlBuilderFactory(string personalAccessToken, string organization, string project = "") 
         : IAzureDevOpsUrlBuilderFactory
     {
+        public string Version { get; set; } = "7.1";
+
         public AzureDevOpsUrlBuilder Create() =>
-            new AzureDevOpsUrlBuilder(personalAccessToken, organization, HttpUtility.UrlPathEncode(project));
+            new AzureDevOpsUrlBuilder(personalAccessToken, HttpUtility.UrlPathEncode(organization), HttpUtility.UrlPathEncode(project), Version);
     }
 }

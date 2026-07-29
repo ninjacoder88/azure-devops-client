@@ -1,5 +1,4 @@
-﻿using MoreLinq;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Ninjasoft.AzureDevOpsClient.Models;
 
 namespace Ninjasoft.AzureDevOpsClient.Repositories
@@ -8,7 +7,7 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
     {
         public async Task<List<WorkItem>> GetWorkItemsAsync(List<int> workItemIds)
         {
-            var batchedWorkItemIds = workItemIds.Batch(200);
+            var batchedWorkItemIds = workItemIds.Chunk(200);
 
             var list = new List<WorkItem>();
             foreach (var batchOfWorkItemIds in batchedWorkItemIds)
@@ -52,9 +51,9 @@ namespace Ninjasoft.AzureDevOpsClient.Repositories
 
         public async Task<WorkItem> UpdateWorkItemFieldAsync(int workItemId, Dictionary<string, string> fieldDictionary)
         {
-            var operations = fieldDictionary.Select(x => new Operation { op = "replace", path = $"/fields/{x.Key}", value = x.Value }).ToList();
+            List<Operation> operations = fieldDictionary.Select(x => new Operation { op = "replace", path = $"/fields/{x.Key}", value = x.Value }).ToList();
 
-            var jsonBody = JsonConvert.SerializeObject(operations);
+            string jsonBody = JsonConvert.SerializeObject(operations);
 
             return await _factory.Create()
                                 .WithPath($"_apis/wit/workitems/{workItemId}")
